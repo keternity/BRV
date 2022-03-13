@@ -15,15 +15,18 @@ import com.drake.engine.base.EngineFragment
 import kotlin.concurrent.thread
 
 /** 对比数据, 根据数据变化更新列表 */
-class DifferDataChangeFragment : EngineFragment<FragmentDifferDataChangeBinding>(R.layout.fragment_differ_data_change) {
+class DifferDataChangeFragment :
+    EngineFragment<FragmentDifferDataChangeBinding>(R.layout.fragment_differ_data_change) {
 
     override fun initView() {
         setHasOptionsMenu(true)
 
         binding.rv.linear().setup {
+            addType<String>(R.layout.item_simple)
             addType<DiffModel>(R.layout.item_simple)
+            addHeader("999")
             onBind {
-                findView<TextView>(R.id.tv_simple).text = getModel<DiffModel>().content
+                findView<TextView>(R.id.tv_simple).text = getModel<Any>().toString()
             }
 
             // 如果要求刷新不白屏请参考以下代码逻辑
@@ -59,7 +62,7 @@ class DifferDataChangeFragment : EngineFragment<FragmentDifferDataChangeBinding>
             // 主线程刷新
             R.id.menu_random_data -> binding.rv.setDifferModels(getRandomData())
             R.id.menu_random_data_async -> thread { // 异步线程对比刷新(避免大量数据对比阻塞主线程)
-                binding.rv.setDifferModels(getRandomData()) {
+                binding.rv.setDifferModels(getRandomData(true)) {
                     // 刷新完成
                     Log.d("BRV", "刷新完成")
                 }
@@ -74,7 +77,7 @@ class DifferDataChangeFragment : EngineFragment<FragmentDifferDataChangeBinding>
      */
     private fun getRandomData(order: Boolean = false): MutableList<Any> {
         return mutableListOf<Any>().apply {
-            for (i in 0..9) {
+            for (i in 0..3) {
                 val id = i.toString()
                 if (i == 3) {
                     add(DiffModel(id, System.currentTimeMillis().toString()))
